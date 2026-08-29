@@ -2,7 +2,11 @@ import { AppError } from "@/errors/app.error";
 import type { LoginInput, RegisterInput } from "./auth.validation";
 import User from "@/models/user.model";
 import { ERROR_CODE } from "@/constants/error-code.constant";
-import { signAccessToken, signRefreshToken } from "./auth.jwt";
+import {
+  signAccessToken,
+  signRefreshToken,
+  verifyRefreshToken,
+} from "./auth.jwt";
 import Session from "@/models/session.model";
 import { expireIn } from "@/utils/index.util";
 
@@ -68,7 +72,46 @@ const login = async (input: LoginInput) => {
   };
 };
 
+const refresh = async (refreshToken: string) => {
+  const { sessionId } = verifyRefreshToken(refreshToken);
+
+  const session = await Session.findById(sessionId);
+
+  if (!session) {
+    throw AppError.unauthorized("Invalid refresh token");
+  }
+
+  if (session.expiresAt < new Date()) {
+    throw AppError.unauthorized("Refresh token has expired");
+  }
+
+  const isVlaidRefreshToken = await session.compareRefreshToken(refreshToken);
+
+  if (!isVlaidRefreshToken) {
+    throw AppError.unauthorized("Invalid refresh token");
+  }
+
+  const accessToken = signAccessToken({
+    userId: session.userId,
+    sessionId: session._id,
+  });
+
+  const newRefreshToken = signRefreshToken({
+    sessionId: session._id,
+  });
+
+  session.refreshTokenHash = newRefreshToken;
+
+  await session.save();
+
+  return {
+    accessToken,
+    newRefreshToken,
+  };
+};
+
 export const authService = {
   register,
   login,
+  refresh,
 };

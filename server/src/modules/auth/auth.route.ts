@@ -20,4 +20,6 @@ authRouter
     asyncHandler(authController.login),
   );
 
+authRouter.route("/refresh").post(asyncHandler(authController.refresh));
+
 export default authRouter;
