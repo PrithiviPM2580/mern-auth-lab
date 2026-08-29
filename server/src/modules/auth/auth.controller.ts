@@ -1,9 +1,10 @@
 import type { TypeRequest } from "@/types";
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import type { LoginInput, RegisterInput } from "./auth.validation";
 import { authService } from "./auth.service";
 import { HTTP_STATUS } from "@/config/http.config";
 import { setAuthenticationCookies } from "./auth.cookie";
+import { AppError } from "@/errors/app.error";
 
 const register = async (req: TypeRequest<RegisterInput>, res: Response) => {
   const user = await authService.register(req.body);
@@ -36,7 +37,31 @@ const login = async (req: TypeRequest<LoginInput>, res: Response) => {
     });
 };
 
+const refresh = async (req: Request, res: Response, next: NextFunction) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return next(AppError.unauthorized("Refresh token is missing"));
+  }
+
+  const { accessToken, newRefreshToken } =
+    await authService.refresh(refreshToken);
+
+  return setAuthenticationCookies({
+    res,
+    accessToken,
+    refreshToken: newRefreshToken,
+  })
+    .status(HTTP_STATUS.OK)
+    .json({
+      message: "Token refreshed successfully",
+      accessToken,
+      refreshToken: newRefreshToken,
+    });
+};
+
 export const authController = {
   register,
   login,
+  refresh,
 };

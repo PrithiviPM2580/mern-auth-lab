@@ -1,4 +1,4 @@
-import { hashValue } from "@/utils/bcrypt.util";
+import { compareValue, hashValue } from "@/utils/bcrypt.util";
 import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface ISession extends Document {
@@ -8,6 +8,8 @@ export interface ISession extends Document {
   expiresAt: Date;
   createdAt: Date;
   updatedAt: Date;
+
+  compareRefreshToken: (refreshToken: string) => Promise<boolean>;
 }
 
 const sessionSchema = new Schema<ISession>(
@@ -51,6 +53,14 @@ sessionSchema.pre<ISession>("save", async function () {
 
   this.refreshTokenHash = await hashValue(this.refreshTokenHash);
 });
+
+sessionSchema.methods.compareRefreshToken = async function (
+  refreshToken: string,
+): Promise<boolean> {
+  if (!this.refreshTokenHash) return false;
+
+  return compareValue(refreshToken, this.refreshTokenHash);
+};
 
 const Session = mongoose.model<ISession>("Session", sessionSchema);
 
