@@ -7,11 +7,11 @@ export const appConfigSchema = z.object({
   APP_ORIGIN: z.url().default("http://localhost:3000"),
   JWT_AUDIENCE: z.string().default("user"),
   JWT_ISSUER: z.string().default("advance-mern-auth"),
-  JWT_ACCESS_SECRET: z.string(),
+  JWT_ACCESS_SECRET: z.string("JWT access secret must be provided"),
   JWT_ACCESS_EXPIRES_IN: z.coerce.number().int().positive().default(3600), // 1 hour in seconds
   JWT_REFRESH_EXPIRES_IN: z.coerce.number().int().positive().default(604800), // 7 days in seconds
-  JWT_REFRESH_SECRET: z.string(),
-  MONGODB_URI: z.url(),
+  JWT_REFRESH_SECRET: z.string("JWT refresh secret must be provided"),
+  MONGODB_URI: z.url("MongoDB connection string must be a valid URL"),
 });
 
 const parsedConfig = appConfigSchema.safeParse(process.env);
