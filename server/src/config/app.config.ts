@@ -8,8 +8,8 @@ export const appConfigSchema = z.object({
   JWT_AUDIENCE: z.string().default("user"),
   JWT_ISSUER: z.string().default("advance-mern-auth"),
   JWT_ACCESS_SECRET: z.string("JWT access secret must be provided"),
-  JWT_ACCESS_EXPIRES_IN: z.coerce.number().int().positive().default(3600), // 1 hour in seconds
-  JWT_REFRESH_EXPIRES_IN: z.coerce.number().int().positive().default(604800), // 7 days in seconds
+  JWT_ACCESS_EXPIRES_IN: z.string().default("15m"), // 15 minutes
+  JWT_REFRESH_EXPIRES_IN: z.string().default("7d"), // 7 days
   JWT_REFRESH_SECRET: z.string("JWT refresh secret must be provided"),
   MONGODB_URI: z.url("MongoDB connection string must be a valid URL"),
 });
