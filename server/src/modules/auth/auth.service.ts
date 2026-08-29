@@ -9,6 +9,7 @@ import {
 } from "./auth.jwt";
 import Session from "@/models/session.model";
 import { expireIn } from "@/utils/index.util";
+import type { Types } from "mongoose";
 
 const register = async (input: RegisterInput) => {
   const { name, email, password } = input;
@@ -122,9 +123,20 @@ const logout = async (refreshToken: string) => {
   await session.deleteOne();
 };
 
+const getMe = async (userId: Types.ObjectId) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw AppError.notFound("User not found");
+  }
+
+  return user;
+};
+
 export const authService = {
   register,
   login,
   refresh,
   logout,
+  getMe,
 };
