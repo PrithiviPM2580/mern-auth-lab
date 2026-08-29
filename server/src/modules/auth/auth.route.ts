@@ -22,4 +22,6 @@ authRouter
 
 authRouter.route("/refresh").post(asyncHandler(authController.refresh));
 
+authRouter.route("/logout").post(asyncHandler(authController.logout));
+
 export default authRouter;

@@ -110,8 +110,21 @@ const refresh = async (refreshToken: string) => {
   };
 };
 
+const logout = async (refreshToken: string) => {
+  const { sessionId } = verifyRefreshToken(refreshToken);
+
+  const session = await Session.findById(sessionId);
+
+  if (!session) {
+    throw AppError.unauthorized("Invalid refresh token");
+  }
+
+  await session.deleteOne();
+};
+
 export const authService = {
   register,
   login,
   refresh,
+  logout,
 };
