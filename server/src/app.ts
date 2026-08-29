@@ -4,13 +4,13 @@ import express, {
   type Response,
   type NextFunction,
 } from "express";
-
+import { errorHandler } from "./middleware/error-handler.middleware";
+import authRouter from "./modules/auth/auth.route";
+import { appConfig } from "./config/app.config";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import morgan from "morgan";
 import cors from "cors";
-import { appConfig } from "./config/app.config";
-import { errorHandler } from "./middleware/error-handler.middleware";
 
 const app: Application = express();
 
@@ -37,6 +37,8 @@ app.get("/health", (req: Request, res: Response) => {
     message: "API is healthy",
   });
 });
+
+app.use(`${appConfig.BASE_PATH}/auth`, authRouter);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.status(404).json({
