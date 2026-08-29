@@ -3,7 +3,10 @@ import type { NextFunction, Request, Response } from "express";
 import type { LoginInput, RegisterInput } from "./auth.validation";
 import { authService } from "./auth.service";
 import { HTTP_STATUS } from "@/config/http.config";
-import { setAuthenticationCookies } from "./auth.cookie";
+import {
+  clearAuthenticationCookies,
+  setAuthenticationCookies,
+} from "./auth.cookie";
 import { AppError } from "@/errors/app.error";
 
 const register = async (req: TypeRequest<RegisterInput>, res: Response) => {
@@ -60,8 +63,21 @@ const refresh = async (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
+const logout = async (req: Request, res: Response, next: NextFunction) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (refreshToken) {
+    await authService.logout(refreshToken);
+  }
+
+  return clearAuthenticationCookies(res).status(HTTP_STATUS.OK).json({
+    message: "User logged out successfully",
+  });
+};
+
 export const authController = {
   register,
   login,
   refresh,
+  logout,
 };
