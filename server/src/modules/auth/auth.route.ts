@@ -2,7 +2,7 @@ import { asyncHandler } from "@/middleware/async-handler.middleware";
 import { Router } from "express";
 import { authController } from "./auth.controller";
 import { validateRequest } from "@/middleware/validate-request.middleware";
-import { registerSchema } from "./auth.validation";
+import { loginSchema, registerSchema } from "./auth.validation";
 
 const authRouter: Router = Router();
 
@@ -11,6 +11,13 @@ authRouter
   .post(
     validateRequest({ body: registerSchema }),
     asyncHandler(authController.register),
+  );
+
+authRouter
+  .route("/login")
+  .post(
+    validateRequest({ body: loginSchema }),
+    asyncHandler(authController.login),
   );
 
 export default authRouter;
