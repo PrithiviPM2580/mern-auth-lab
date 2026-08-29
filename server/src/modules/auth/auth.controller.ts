@@ -75,9 +75,25 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
   });
 };
 
+const me = async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+
+  if (!userId) {
+    throw AppError.unauthorized("User not authenticated");
+  }
+
+  const user = await authService.getMe(userId);
+
+  return res.status(HTTP_STATUS.OK).json({
+    message: "User fetched successfully",
+    user,
+  });
+};
+
 export const authController = {
   register,
   login,
   refresh,
   logout,
+  getMe: me,
 };

@@ -3,6 +3,7 @@ import { Router } from "express";
 import { authController } from "./auth.controller";
 import { validateRequest } from "@/middleware/validate-request.middleware";
 import { loginSchema, registerSchema } from "./auth.validation";
+import { authenticate } from "@/middleware/authenticate.middleware";
 
 const authRouter: Router = Router();
 
@@ -22,6 +23,10 @@ authRouter
 
 authRouter.route("/refresh").post(asyncHandler(authController.refresh));
 
-authRouter.route("/logout").post(asyncHandler(authController.logout));
+authRouter
+  .route("/logout")
+  .post(authenticate, asyncHandler(authController.logout));
+
+authRouter.route("/me").get(authenticate, asyncHandler(authController.getMe));
 
 export default authRouter;
