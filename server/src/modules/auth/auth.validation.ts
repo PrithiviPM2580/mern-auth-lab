@@ -29,7 +29,18 @@ export const refreshTokenSchema = z.object({
   sessionId: objectIdSchema,
 });
 
+export const verifyEmailByLinkQuery = z.object({
+  token: z.string().min(1, "Token is required"),
+});
+
+export const verifyEmailByCodeBody = z.object({
+  email: z.email("Invalid email address"),
+  code: z.string().min(6, "Code must be at least 6 characters long"),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type AccessTokenPayload = z.infer<typeof accessTokenSchema>;
 export type RefreshTokenPayload = z.infer<typeof refreshTokenSchema>;
+export type VerifyEmailByLinkQuery = z.infer<typeof verifyEmailByLinkQuery>;
+export type VerifyEmailByCodeBody = z.infer<typeof verifyEmailByCodeBody>;
