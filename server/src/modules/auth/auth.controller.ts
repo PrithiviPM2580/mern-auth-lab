@@ -7,6 +7,7 @@ import type {
   VerifyEmailByCodeBody,
   ForgotPasswordInput,
   ResetPasswordInput,
+  ChangePasswordInput,
 } from "./auth.validation";
 import { authService } from "./auth.service";
 import { HTTP_STATUS } from "@/config/http.config";
@@ -141,6 +142,17 @@ const resetPassword = async (
   });
 };
 
+const changePassword = async (
+  req: TypeRequest<ChangePasswordInput>,
+  res: Response,
+) => {
+  await authService.changePassword(req.body, req.user!.userId);
+
+  return res.status(HTTP_STATUS.OK).json({
+    message: "Password changed successfully",
+  });
+};
+
 export const authController = {
   register,
   login,
@@ -151,4 +163,5 @@ export const authController = {
   verifyEmailByCode,
   forgotPassword,
   resetPassword,
+  changePassword,
 };

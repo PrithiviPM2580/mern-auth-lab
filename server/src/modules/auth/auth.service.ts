@@ -1,5 +1,6 @@
 import { AppError } from "@/errors/app.error";
 import type {
+  ChangePasswordInput,
   ForgotPasswordInput,
   LoginInput,
   RegisterInput,
@@ -338,6 +339,29 @@ const resetPassword = async (input: ResetPasswordInput) => {
   await passwordReset.deleteOne();
 };
 
+const changePassword = async (
+  input: ChangePasswordInput,
+  userId: Types.ObjectId,
+) => {
+  const { currentPassword, newPassword } = input;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw AppError.notFound("User not found");
+  }
+
+  const isCurrentPasswordValid = await user.comparePassword(currentPassword);
+
+  if (!isCurrentPasswordValid) {
+    throw AppError.unauthorized("Current password is incorrect");
+  }
+
+  user.passwordHash = newPassword;
+
+  await user.save();
+};
+
 export const authService = {
   register,
   login,
@@ -348,4 +372,5 @@ export const authService = {
   verifyEmailByCode,
   forgotPassword,
   resetPassword,
+  changePassword,
 };

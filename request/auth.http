@@ -1,6 +1,7 @@
 @BASE_URL = http://localhost:3000/api/v1
 @CODE= 727538
-@TOKEN=52dcd1d7cd892b255f63b37d232ba6491a61f0b786aac9dbd520160f84a886d0
+@VERIFY_TOKEN=e4b015b3a501ac846185ca38642b8bc277a64f4aba496dc674f4bc5f84c843fc
+@RESET_TOKEN=60c58d88ecfba2ac252095c3d242a0ba9080daea6bf4666663138d6dc42844ae
 
 ### Register
 
@@ -9,7 +10,7 @@ Content-Type: application/json
 
 {
     "name":"John Doe",
-    "email":"dolijis987@robustq.com",
+    "email":"cexehox721@robustq.com",
     "password":"password123"
 }
 
@@ -19,7 +20,7 @@ POST {{BASE_URL}}/auth/login
 Content-Type: application/json
 
 {
-    "email":"dolijis987@robustq.com",
+    "email":"cexehox721@robustq.com",
     "password":"password123"
 }
 
@@ -46,14 +47,14 @@ POST {{BASE_URL}}/auth/verify-email/code
 Content-Type: application/json
 
 {
-    "email": "dolijis987@robustq.com",
+    "email": "cexehox721@robustq.com",
     "code": "{{CODE}}"
 }
 
 
 ### Verify Email - Link
 
-GET {{BASE_URL}}/auth/verify-email/link?token={{TOKEN}}
+GET {{BASE_URL}}/auth/verify-email/link?token={{VERIFY_TOKEN}}
 
 
 #### Forgot Password
@@ -62,7 +63,7 @@ POST {{BASE_URL}}/auth/forgot-password
 Content-Type: application/json
 
 {
-    "email": "dolijis987@robustq.com"
+    "email": "cexehox721@robustq.com"
 }
 
 
@@ -72,8 +73,19 @@ POST {{BASE_URL}}/auth/reset-password
 Content-Type: application/json
 
 {
-    "token": "{{TOKEN}}",
+    "token": "{{RESET_TOKEN}}",
     "password": "newpassword123"
+}
+
+
+#### Change Password
+
+POST {{BASE_URL}}/auth/change-password
+Content-Type: application/json
+
+{
+    "oldPassword": "password123",
+    "newPassword": "newpassword123"
 }
 
 

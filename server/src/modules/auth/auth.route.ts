@@ -8,6 +8,8 @@ import {
   verifyEmailByLinkQuery,
   verifyEmailByCodeBody,
   forgotPasswordSchema,
+  resetPasswordSchema,
+  changePasswordSchema,
 } from "./auth.validation";
 import { authenticate } from "@/middleware/authenticate.middleware";
 
@@ -54,6 +56,21 @@ authRouter
   .post(
     validateRequest({ body: forgotPasswordSchema }),
     asyncHandler(authController.forgotPassword),
+  );
+
+authRouter
+  .route("/reset-password")
+  .post(
+    validateRequest({ body: resetPasswordSchema }),
+    asyncHandler(authController.resetPassword),
+  );
+
+authRouter
+  .route("/change-password")
+  .post(
+    authenticate,
+    validateRequest({ body: changePasswordSchema }),
+    asyncHandler(authController.changePassword),
   );
 
 export default authRouter;
