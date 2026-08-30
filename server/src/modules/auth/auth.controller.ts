@@ -16,6 +16,7 @@ import {
   setAuthenticationCookies,
 } from "./auth.cookie";
 import { AppError } from "@/errors/app.error";
+import { getUserIdFromRequest } from "@/utils/index.util";
 
 const register = async (req: TypeRequest<RegisterInput>, res: Response) => {
   const user = await authService.register(req.body);
@@ -84,11 +85,7 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const me = async (req: Request, res: Response) => {
-  const userId = req.user?.userId;
-
-  if (!userId) {
-    throw AppError.unauthorized("User not authenticated");
-  }
+  const userId = getUserIdFromRequest(req);
 
   const user = await authService.getMe(userId);
 
@@ -146,11 +143,62 @@ const changePassword = async (
   req: TypeRequest<ChangePasswordInput>,
   res: Response,
 ) => {
-  await authService.changePassword(req.body, req.user!.userId);
+  const userId = getUserIdFromRequest(req);
+
+  await authService.changePassword(req.body, userId);
 
   return res.status(HTTP_STATUS.OK).json({
     message: "Password changed successfully",
   });
+};
+
+const googleCallback = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (!req.user) {
+    return next(AppError.unauthorized("User not authenticated"));
+  }
+
+  const { accessToken, refreshToken } = await authService.completeOAuthLogin(
+    req.user,
+  );
+
+  return setAuthenticationCookies({
+    res,
+    accessToken,
+    refreshToken,
+  })
+    .status(HTTP_STATUS.OK)
+    .json({
+      message: "User logged in successfully",
+      user: req.user,
+      accessToken,
+      refreshToken,
+    });
+};
+
+const githubCallback = async (req: Request, res: Response) => {
+  if (!req.user) {
+    throw AppError.unauthorized("User not authenticated");
+  }
+
+  const { accessToken, refreshToken } = await authService.completeOAuthLogin(
+    req.user,
+  );
+
+  return setAuthenticationCookies({
+    res,
+    accessToken,
+    refreshToken,
+  })
+    .status(HTTP_STATUS.OK)
+    .json({
+      message: "User logged in successfully",
+      accessToken,
+      refreshToken,
+    });
 };
 
 export const authController = {
@@ -164,4 +212,6 @@ export const authController = {
   forgotPassword,
   resetPassword,
   changePassword,
+  googleCallback,
+  githubCallback,
 };

@@ -26,6 +26,12 @@ export const appConfigSchema = z.object({
   SMTP_PORT: z.coerce.number().int().positive().default(465),
   SMTP_USER: z.string("SMTP user must be provided"),
   SMTP_PASSWORD: z.string("SMTP password must be provided"),
+  GOOGLE_CLIENT_ID: z.string("Google client ID must be provided"),
+  GOOGLE_CLIENT_SECRET: z.string("Google client secret must be provided"),
+  GOOGLE_CALLBACK_URL: z.string("Google callback URL must be provided"),
+  GITHUB_CLIENT_ID: z.string("GitHub client ID must be provided"),
+  GITHUB_CLIENT_SECRET: z.string("GitHub client secret must be provided"),
+  GITHUB_CALLBACK_URL: z.string("GitHub callback URL must be provided"),
   MONGODB_URI: z.url("MongoDB connection string must be a valid URL"),
 });
 

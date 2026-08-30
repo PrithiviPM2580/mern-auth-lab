@@ -12,6 +12,7 @@ import {
   changePasswordSchema,
 } from "./auth.validation";
 import { authenticate } from "@/middleware/authenticate.middleware";
+import passport from "@/config/passport.config";
 
 const authRouter: Router = Router();
 
@@ -72,5 +73,36 @@ authRouter
     validateRequest({ body: changePasswordSchema }),
     asyncHandler(authController.changePassword),
   );
+
+authRouter.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  }),
+);
+
+authRouter.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    session: false,
+  }),
+  asyncHandler(authController.googleCallback),
+);
+
+authRouter.get(
+  "/github",
+  passport.authenticate("github", {
+    scope: ["user:email"],
+    session: false,
+  }),
+);
+
+authRouter.get(
+  "/github/callback",
+  passport.authenticate("github", {
+    session: false,
+  }),
+  asyncHandler(authController.githubCallback),
+);
 
 export default authRouter;
