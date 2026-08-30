@@ -5,6 +5,8 @@ import type {
   RegisterInput,
   VerifyEmailByLinkQuery,
   VerifyEmailByCodeBody,
+  ForgotPasswordInput,
+  ResetPasswordInput,
 } from "./auth.validation";
 import { authService } from "./auth.service";
 import { HTTP_STATUS } from "@/config/http.config";
@@ -100,6 +102,10 @@ const verifyEmailByLink = async (
   res: Response,
 ) => {
   await authService.verifyEmailByLink(req.query);
+
+  return res.status(HTTP_STATUS.OK).json({
+    message: "Email verified successfully",
+  });
 };
 
 const verifyEmailByCode = async (
@@ -113,6 +119,28 @@ const verifyEmailByCode = async (
   });
 };
 
+const forgotPassword = async (
+  req: TypeRequest<ForgotPasswordInput>,
+  res: Response,
+) => {
+  await authService.forgotPassword(req.body);
+
+  return res.status(HTTP_STATUS.OK).json({
+    message: "Password reset email sent successfully",
+  });
+};
+
+const resetPassword = async (
+  req: TypeRequest<ResetPasswordInput>,
+  res: Response,
+) => {
+  await authService.resetPassword(req.body);
+
+  return res.status(HTTP_STATUS.OK).json({
+    message: "Password reset successfully",
+  });
+};
+
 export const authController = {
   register,
   login,
@@ -121,4 +149,6 @@ export const authController = {
   getMe: me,
   verifyEmailByLink,
   verifyEmailByCode,
+  forgotPassword,
+  resetPassword,
 };

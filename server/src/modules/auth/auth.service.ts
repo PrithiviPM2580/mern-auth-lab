@@ -1,7 +1,9 @@
 import { AppError } from "@/errors/app.error";
 import type {
+  ForgotPasswordInput,
   LoginInput,
   RegisterInput,
+  ResetPasswordInput,
   VerifyEmailByCodeBody,
   VerifyEmailByLinkQuery,
 } from "./auth.validation";
@@ -23,7 +25,11 @@ import {
 import { appConfig } from "@/config/app.config";
 import EmailVerification from "@/models/email-verification.model";
 import { hashValue } from "@/utils/bcrypt.util";
-import { sendVerificationEmail } from "./auth.nodemailer";
+import {
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+} from "./auth.nodemailer";
+import PasswordReset from "@/models/password-reset.model";
 
 const register = async (input: RegisterInput) => {
   const { name, email, password } = input;
@@ -43,12 +49,12 @@ const register = async (input: RegisterInput) => {
     passwordHash: password,
   });
 
-  const verificationToken = await createVerification(newUser._id, "code");
+  const verificationToken = await createVerification(newUser._id, "link");
 
   await sendVerificationEmail({
     email: newUser.email,
     token: verificationToken,
-    method: "code",
+    method: "link",
   });
 
   return newUser;
@@ -261,6 +267,77 @@ const verifyEmailByCode = async (body: VerifyEmailByCodeBody) => {
   await emailVerification.deleteOne();
 };
 
+const forgotPassword = async (body: ForgotPasswordInput) => {
+  const { email } = body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw AppError.notFound("User not found");
+  }
+
+  const rawToken = generateVerificationToken();
+
+  const tokenHash = await hashValue(rawToken);
+
+  const expiresAt = new Date(
+    Date.now() + appConfig.PASSWORD_RESET_EXPIRES_MINUTES * 60 * 1000,
+  );
+
+  await PasswordReset.findOneAndUpdate(
+    { userId: user._id },
+    {
+      userId: user._id,
+      tokenHash,
+      expiresAt,
+    },
+    {
+      upsert: true,
+      returnDocument: "after",
+    },
+  );
+
+  await sendPasswordResetEmail({
+    email: user.email,
+    token: rawToken,
+  });
+};
+
+const resetPassword = async (input: ResetPasswordInput) => {
+  const { token, password } = input;
+
+  const resetRecords = await PasswordReset.find({
+    expiresAt: { $gt: new Date() },
+  });
+
+  let passwordReset = null;
+
+  for (const record of resetRecords) {
+    const isValid = await record.compareToken(token);
+
+    if (isValid) {
+      passwordReset = record;
+      break;
+    }
+  }
+
+  if (!passwordReset) {
+    throw AppError.badRequest("Invalid or expired password reset token");
+  }
+
+  const user = await User.findById(passwordReset.userId);
+
+  if (!user) {
+    throw AppError.notFound("User not found");
+  }
+
+  user.passwordHash = await hashValue(password);
+
+  await user.save();
+
+  await passwordReset.deleteOne();
+};
+
 export const authService = {
   register,
   login,
@@ -269,4 +346,6 @@ export const authService = {
   getMe,
   verifyEmailByLink,
   verifyEmailByCode,
+  forgotPassword,
+  resetPassword,
 };
