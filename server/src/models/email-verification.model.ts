@@ -1,0 +1,37 @@
+import mongoose, { Schema, Document, Types } from "mongoose";
+
+export type EmailVerificationMethod = "code" | "link";
+
+export interface IEmailVerification extends Document {
+  userId: Types.ObjectId;
+  tokenHash: string;
+  method: EmailVerificationMethod;
+  expiresAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const emailVerificationSchema: Schema<IEmailVerification> = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      unique: true,
+      index: true,
+    },
+    tokenHash: { type: String, required: true, unique: true },
+    method: { type: String, enum: ["code", "link"], required: true },
+    expiresAt: { type: Date, required: true, expires: 0 },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+const EmailVerification = mongoose.model<IEmailVerification>(
+  "EmailVerification",
+  emailVerificationSchema,
+);
+
+export default EmailVerification;

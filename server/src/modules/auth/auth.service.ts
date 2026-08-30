@@ -10,6 +10,15 @@ import {
 import Session from "@/models/session.model";
 import { expireIn } from "@/utils/index.util";
 import type { Types } from "mongoose";
+import type { EmailVerificationMethod } from "@/models/email-verification.model";
+import {
+  generateVerificationCode,
+  generateVerificationToken,
+} from "./auth.crypto";
+import { appConfig } from "@/config/app.config";
+import EmailVerification from "@/models/email-verification.model";
+import { hashValue } from "@/utils/bcrypt.util";
+import { sendVerificationEmail } from "./auth.nodemailer";
 
 const register = async (input: RegisterInput) => {
   const { name, email, password } = input;
@@ -27,6 +36,14 @@ const register = async (input: RegisterInput) => {
     name,
     email,
     passwordHash: password,
+  });
+
+  const verificationToken = await createVerification(newUser._id, "code");
+
+  await sendVerificationEmail({
+    email: newUser.email,
+    token: verificationToken,
+    method: "code",
   });
 
   return newUser;
@@ -131,6 +148,35 @@ const getMe = async (userId: Types.ObjectId) => {
   }
 
   return user;
+};
+
+const createVerification = async (
+  userId: Types.ObjectId,
+  method: EmailVerificationMethod,
+) => {
+  const rawToken =
+    method === "code"
+      ? generateVerificationCode()
+      : generateVerificationToken();
+
+  const tokenHash = await hashValue(rawToken);
+
+  const expiresAt = new Date(
+    Date.now() + appConfig.EMAIL_VERIFICATION_EXPIRES_MINUTES * 60 * 1000,
+  );
+
+  await EmailVerification.findOneAndUpdate(
+    { userId },
+    {
+      userId,
+      tokenHash,
+      method,
+      expiresAt,
+    },
+    { upsert: true, returnDocument: "after" },
+  );
+
+  return rawToken;
 };
 
 export const authService = {
