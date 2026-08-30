@@ -70,3 +70,19 @@ export const verifyAccessToken = (token: string): AccessTokenPayload => {
 export const verifyRefreshToken = (token: string): RefreshTokenPayload => {
   return verifyToken(token, appConfig.JWT_REFRESH_SECRET, refreshTokenSchema);
 };
+
+export const createAuthTokens = (user: AccessTokenPayload) => {
+  const accessToken = signAccessToken({
+    userId: user.userId,
+    sessionId: user.sessionId,
+  });
+
+  const refreshToken = signRefreshToken({
+    sessionId: user.sessionId,
+  });
+
+  return {
+    accessToken,
+    refreshToken,
+  };
+};

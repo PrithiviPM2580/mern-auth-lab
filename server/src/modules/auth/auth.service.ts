@@ -1,5 +1,6 @@
 import { AppError } from "@/errors/app.error";
 import type {
+  AccessTokenPayload,
   ChangePasswordInput,
   ForgotPasswordInput,
   LoginInput,
@@ -11,6 +12,7 @@ import type {
 import User from "@/models/user.model";
 import { ERROR_CODE } from "@/constants/error-code.constant";
 import {
+  createAuthTokens,
   signAccessToken,
   signRefreshToken,
   verifyRefreshToken,
@@ -31,6 +33,7 @@ import {
   sendVerificationEmail,
 } from "./auth.nodemailer";
 import PasswordReset from "@/models/password-reset.model";
+import type { IUser } from "@/models/user.model";
 
 const register = async (input: RegisterInput) => {
   const { name, email, password } = input;
@@ -362,6 +365,26 @@ const changePassword = async (
   await user.save();
 };
 
+const completeOAuthLogin = async (user: any) => {
+  const session = await Session.create({
+    userId: user._id,
+    expiresAt: expireIn(),
+  });
+
+  const tokenPayload: AccessTokenPayload = {
+    userId: user._id,
+    sessionId: session._id,
+  };
+
+  const { accessToken, refreshToken } = await createAuthTokens(tokenPayload);
+
+  return {
+    user,
+    accessToken,
+    refreshToken,
+  };
+};
+
 export const authService = {
   register,
   login,
@@ -373,4 +396,5 @@ export const authService = {
   forgotPassword,
   resetPassword,
   changePassword,
+  completeOAuthLogin,
 };
