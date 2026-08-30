@@ -2,7 +2,12 @@ import { asyncHandler } from "@/middleware/async-handler.middleware";
 import { Router } from "express";
 import { authController } from "./auth.controller";
 import { validateRequest } from "@/middleware/validate-request.middleware";
-import { loginSchema, registerSchema } from "./auth.validation";
+import {
+  loginSchema,
+  registerSchema,
+  verifyEmailByLinkQuery,
+  verifyEmailByCodeBody,
+} from "./auth.validation";
 import { authenticate } from "@/middleware/authenticate.middleware";
 
 const authRouter: Router = Router();
@@ -28,5 +33,19 @@ authRouter
   .post(authenticate, asyncHandler(authController.logout));
 
 authRouter.route("/me").get(authenticate, asyncHandler(authController.getMe));
+
+authRouter
+  .route("/verify-email/link")
+  .get(
+    validateRequest({ query: verifyEmailByLinkQuery }),
+    asyncHandler(authController.verifyEmailByLink),
+  );
+
+authRouter
+  .route("/verify-email/code")
+  .post(
+    validateRequest({ body: verifyEmailByCodeBody }),
+    asyncHandler(authController.verifyEmailByCode),
+  );
 
 export default authRouter;

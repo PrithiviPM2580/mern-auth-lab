@@ -1,6 +1,11 @@
 import type { TypeRequest } from "@/types";
 import type { NextFunction, Request, Response } from "express";
-import type { LoginInput, RegisterInput } from "./auth.validation";
+import type {
+  LoginInput,
+  RegisterInput,
+  VerifyEmailByLinkQuery,
+  VerifyEmailByCodeBody,
+} from "./auth.validation";
 import { authService } from "./auth.service";
 import { HTTP_STATUS } from "@/config/http.config";
 import {
@@ -90,10 +95,30 @@ const me = async (req: Request, res: Response) => {
   });
 };
 
+const verifyEmailByLink = async (
+  req: TypeRequest<unknown, unknown, VerifyEmailByLinkQuery>,
+  res: Response,
+) => {
+  await authService.verifyEmailByLink(req.query);
+};
+
+const verifyEmailByCode = async (
+  req: TypeRequest<VerifyEmailByCodeBody>,
+  res: Response,
+) => {
+  await authService.verifyEmailByCode(req.body);
+
+  return res.status(HTTP_STATUS.OK).json({
+    message: "Email verified successfully",
+  });
+};
+
 export const authController = {
   register,
   login,
   refresh,
   logout,
   getMe: me,
+  verifyEmailByLink,
+  verifyEmailByCode,
 };

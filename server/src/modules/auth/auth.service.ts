@@ -1,5 +1,10 @@
 import { AppError } from "@/errors/app.error";
-import type { LoginInput, RegisterInput } from "./auth.validation";
+import type {
+  LoginInput,
+  RegisterInput,
+  VerifyEmailByCodeBody,
+  VerifyEmailByLinkQuery,
+} from "./auth.validation";
 import User from "@/models/user.model";
 import { ERROR_CODE } from "@/constants/error-code.constant";
 import {
@@ -179,10 +184,89 @@ const createVerification = async (
   return rawToken;
 };
 
+const verifyEmailByLink = async (token: VerifyEmailByLinkQuery) => {
+  const verifications = await EmailVerification.find({
+    method: "link",
+  });
+
+  for (const verification of verifications) {
+    if (verification.expiresAt < new Date()) {
+      continue;
+    }
+
+    const isValid = await verification.compareToken(token.token);
+
+    if (!isValid) {
+      continue;
+    }
+
+    const user = await User.findById(verification.userId);
+
+    if (!user) {
+      throw AppError.notFound("User not found");
+    }
+
+    if (user.isEmailVerified) {
+      throw AppError.badRequest("Email is already verified");
+    }
+
+    user.isEmailVerified = true;
+
+    await user.save();
+
+    await verification.deleteOne();
+
+    return;
+  }
+
+  throw AppError.badRequest("Invalid or expired verification token");
+};
+
+const verifyEmailByCode = async (body: VerifyEmailByCodeBody) => {
+  const { code, email } = body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw AppError.notFound("User not found");
+  }
+
+  if (user.isEmailVerified) {
+    throw AppError.badRequest("Email is already verified");
+  }
+
+  const emailVerification = await EmailVerification.findOne({
+    userId: user._id,
+    method: "code",
+  });
+
+  if (!emailVerification) {
+    throw AppError.notFound("Email verification not found");
+  }
+
+  if (emailVerification.expiresAt < new Date()) {
+    throw AppError.badRequest("Verification code has expired");
+  }
+
+  const isCodeValid = await emailVerification.compareToken(code);
+
+  if (!isCodeValid) {
+    throw AppError.badRequest("Invalid verification code");
+  }
+
+  user.isEmailVerified = true;
+
+  await user.save();
+
+  await emailVerification.deleteOne();
+};
+
 export const authService = {
   register,
   login,
   refresh,
   logout,
   getMe,
+  verifyEmailByLink,
+  verifyEmailByCode,
 };
