@@ -4,8 +4,10 @@ import express, {
   type Response,
   type NextFunction,
 } from "express";
+import twoFactorRouter from "./modules/auth/two-factor/two-factor.route";
 import { errorHandler } from "./middleware/error-handler.middleware";
 import authRouter from "./modules/auth/auth.route";
+import passport from "@/config/passport.config";
 import { appConfig } from "./config/app.config";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
@@ -19,13 +21,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(helmet());
 app.use(morgan("dev"));
+app.use(passport.initialize());
 app.use(
   cors({
     origin: appConfig.APP_ORIGIN,
     credentials: true,
   }),
 );
-
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
     message: "Welcome to the Advance MERN Auth API",
@@ -39,6 +41,7 @@ app.get("/health", (req: Request, res: Response) => {
 });
 
 app.use(`${appConfig.BASE_PATH}/auth`, authRouter);
+app.use(`${appConfig.BASE_PATH}/2fa`, twoFactorRouter);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.status(404).json({

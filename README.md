@@ -1265,4 +1265,45 @@ Authentication systems are security-sensitive. Before using this project in prod
 📄 License
 
 This project is created for educational and practice purposes.
+
+PHASE 1 ✅
+Email/password
+├── Register
+├── Login
+├── Access token
+├── Refresh token
+├── Refresh rotation
+├── Protected routes
+└── Logout
+
+PHASE 2 ✅
+Email security
+├── Email verification
+├── Forgot password
+├── Reset password
+└── Change password
+
+PHASE 3 ✅
+OAuth
+├── Google
+└── GitHub
+
+PHASE 4 ← NEXT
+Two-factor authentication
+├── Enable 2FA
+├── Generate secret
+├── Generate QR code
+├── Verify OTP
+├── Login with 2FA
+├── Disable 2FA
+└── Recovery codes
+
+PHASE 5
+Security hardening
+├── Rate limiting
+├── CSRF
+├── Security headers
+├── Account protection
+└── OAuth account linking
+
 ```

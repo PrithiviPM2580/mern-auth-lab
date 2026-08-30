@@ -3,6 +3,8 @@
 @VERIFY_TOKEN=e4b015b3a501ac846185ca38642b8bc277a64f4aba496dc674f4bc5f84c843fc
 @RESET_TOKEN=60c58d88ecfba2ac252095c3d242a0ba9080daea6bf4666663138d6dc42844ae
 
+@ACCESS_TOKEN=
+
 ### Register
 
 POST {{BASE_URL}}/auth/register
@@ -87,5 +89,24 @@ Content-Type: application/json
     "oldPassword": "password123",
     "newPassword": "newpassword123"
 }
+
+
+
+### Google OAuth
+
+GET {{BASE_URL}}/auth/google
+
+
+#### Github OAuth
+
+GET {{BASE_URL}}/auth/github
+
+
+
+### Setup TOTP
+
+POST {{BASE_URL}}/2fa/setup-totp
+Content-Type: application/json
+Cookie: accessToken=
 
 
