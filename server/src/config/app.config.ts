@@ -4,6 +4,7 @@ export const appConfigSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
   NODE_ENV: z.enum(["development", "production"]).default("development"),
   BASE_PATH: z.string().default("/api/v1"),
+  FRONTEND_URL: z.url().default("http://localhost:5173"),
   APP_ORIGIN: z.url().default("http://localhost:3000"),
   JWT_AUDIENCE: z.string().default("user"),
   JWT_ISSUER: z.string().default("advance-mern-auth"),
@@ -11,6 +12,15 @@ export const appConfigSchema = z.object({
   JWT_ACCESS_EXPIRES_IN: z.string().default("15m"), // 15 minutes
   JWT_REFRESH_EXPIRES_IN: z.string().default("7d"), // 7 days
   JWT_REFRESH_SECRET: z.string("JWT refresh secret must be provided"),
+  EMAIL_VERIFICATION_EXPIRES_MINUTES: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(1),
+  SMTP_HOST: z.string("SMTP host must be provided"),
+  SMTP_PORT: z.coerce.number().int().positive().default(465),
+  SMTP_USER: z.string("SMTP user must be provided"),
+  SMTP_PASSWORD: z.string("SMTP password must be provided"),
   MONGODB_URI: z.url("MongoDB connection string must be a valid URL"),
 });
 

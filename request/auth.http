@@ -1,4 +1,6 @@
 @BASE_URL = http://localhost:3000/api/v1
+# @ACCESS_TOKEN = 
+# @REFRESH_TOKEN =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiI2YTkzYjZkNzBkYTlkZmZiY2VmNTdmYTkiLCJpYXQiOjE3ODgwNjU0OTUsImV4cCI6MTc4ODY3MDI5NSwiYXVkIjoidXNlciIsImlzcyI6Im1lcm4tYXV0aC1sYWIifQ.avD5py3Tkk2oyghRvSam3bxi8N8lIqheqRGfxgeYgGE
 
 ### Register
 
@@ -7,7 +9,7 @@ Content-Type: application/json
 
 {
     "name":"John Doe",
-    "email":"john.doe@example.com",
+    "email":"dolijis987@robustq.com",
     "password":"password123"
 }
 
@@ -17,6 +19,26 @@ POST {{BASE_URL}}/auth/login
 Content-Type: application/json
 
 {
-    "email":"john.doe@example.com",
+    "email":"dolijis987@robustq.com",
     "password":"password123"
 }
+
+### Refresh
+
+POST {{BASE_URL}}/auth/refresh
+Content-Type: application/json
+# Cookie: refreshToken={{REFRESH_TOKEN}}
+
+
+#### Logout
+
+POST {{BASE_URL}}/auth/logout
+Content-Type: application/json
+# Cookie: refreshToken={{REFRESH_TOKEN}}
+
+
+#### Get User Profile
+
+GET {{BASE_URL}}/auth/me
+# Cookie: accessToken={{ACCESS_TOKEN}}
+

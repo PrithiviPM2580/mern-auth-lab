@@ -3,7 +3,7 @@ import type { CookieOptions, Response } from "express";
 import type { AuthenticationCookiesPayload } from "@/types";
 import { appConfig } from "@/config/app.config";
 
-const REFRESH_PATH = `${appConfig.BASE_PATH}/auth/refresh`;
+const REFRESH_PATH = `${appConfig.BASE_PATH}/auth`;
 
 export const defaultCookieOptions: CookieOptions = {
   httpOnly: true,
