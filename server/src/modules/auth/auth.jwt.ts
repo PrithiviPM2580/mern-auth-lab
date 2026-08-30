@@ -9,6 +9,10 @@ import {
 } from "./auth.validation";
 import { appConfig } from "@/config/app.config";
 import { AppError } from "@/errors/app.error";
+import {
+  twoFactorChallengeSchema,
+  type TwoFactorChallengePayload,
+} from "./two-factor/two-factor.validation";
 
 const signToken = (
   payload: JwtPayload,
@@ -85,4 +89,20 @@ export const createAuthTokens = (user: AccessTokenPayload) => {
     accessToken,
     refreshToken,
   };
+};
+
+export const signTwoFactorChallenge = (
+  payload: TwoFactorChallengePayload,
+): string => {
+  return signToken(
+    payload,
+    appConfig.JWT_2FA_SECRET,
+    appConfig.JWT_2FA_EXPIRES_IN as StringValue,
+  );
+};
+
+export const verifyTwoFactorChallenge = (
+  token: string,
+): TwoFactorChallengePayload => {
+  return verifyToken(token, appConfig.JWT_2FA_SECRET, twoFactorChallengeSchema);
 };

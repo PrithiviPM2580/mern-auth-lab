@@ -9,4 +9,8 @@ twoFactorRouter
   .route("/setup-totp")
   .post(authenticate, asyncHandler(twoFactorController.setupTotp));
 
+twoFactorRouter
+  .route("/verify-totp")
+  .post(authenticate, asyncHandler(twoFactorController.verifyAndEnableTotp));
+
 export default twoFactorRouter;

@@ -52,6 +52,12 @@ export const changePasswordSchema = z.object({
   newPassword: z.string().min(8, "New password must be at least 8 characters"),
 });
 
+export const verifyTwoFactorLoginSchema = z.object({
+  twoFactorToken: z.string().min(1),
+  code: z.string().regex(/^\d{6}$/, "Invalid OTP code"),
+  userAgent: z.string().optional(),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type AccessTokenPayload = z.infer<typeof accessTokenSchema>;
@@ -61,3 +67,6 @@ export type VerifyEmailByCodeBody = z.infer<typeof verifyEmailByCodeBody>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type VerifyTwoFactorLoginInput = z.infer<
+  typeof verifyTwoFactorLoginSchema
+>;
