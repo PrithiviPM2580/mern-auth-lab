@@ -1,6 +1,6 @@
 @BASE_URL = http://localhost:3000/api/v1
-# @ACCESS_TOKEN = 
-# @REFRESH_TOKEN =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiI2YTkzYjZkNzBkYTlkZmZiY2VmNTdmYTkiLCJpYXQiOjE3ODgwNjU0OTUsImV4cCI6MTc4ODY3MDI5NSwiYXVkIjoidXNlciIsImlzcyI6Im1lcm4tYXV0aC1sYWIifQ.avD5py3Tkk2oyghRvSam3bxi8N8lIqheqRGfxgeYgGE
+@CODE= 727538
+@TOKEN=52dcd1d7cd892b255f63b37d232ba6491a61f0b786aac9dbd520160f84a886d0
 
 ### Register
 
@@ -27,18 +27,53 @@ Content-Type: application/json
 
 POST {{BASE_URL}}/auth/refresh
 Content-Type: application/json
-# Cookie: refreshToken={{REFRESH_TOKEN}}
 
 
 #### Logout
 
 POST {{BASE_URL}}/auth/logout
 Content-Type: application/json
-# Cookie: refreshToken={{REFRESH_TOKEN}}
 
 
 #### Get User Profile
 
 GET {{BASE_URL}}/auth/me
-# Cookie: accessToken={{ACCESS_TOKEN}}
+
+
+### Verify Email - Code
+
+POST {{BASE_URL}}/auth/verify-email/code
+Content-Type: application/json
+
+{
+    "email": "dolijis987@robustq.com",
+    "code": "{{CODE}}"
+}
+
+
+### Verify Email - Link
+
+GET {{BASE_URL}}/auth/verify-email/link?token={{TOKEN}}
+
+
+#### Forgot Password
+
+POST {{BASE_URL}}/auth/forgot-password
+Content-Type: application/json
+
+{
+    "email": "dolijis987@robustq.com"
+}
+
+
+### Reset Password
+
+POST {{BASE_URL}}/auth/reset-password
+Content-Type: application/json
+
+{
+    "token": "{{TOKEN}}",
+    "password": "newpassword123"
+}
+
 

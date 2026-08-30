@@ -7,6 +7,7 @@ import {
   registerSchema,
   verifyEmailByLinkQuery,
   verifyEmailByCodeBody,
+  forgotPasswordSchema,
 } from "./auth.validation";
 import { authenticate } from "@/middleware/authenticate.middleware";
 
@@ -46,6 +47,13 @@ authRouter
   .post(
     validateRequest({ body: verifyEmailByCodeBody }),
     asyncHandler(authController.verifyEmailByCode),
+  );
+
+authRouter
+  .route("/forgot-password")
+  .post(
+    validateRequest({ body: forgotPasswordSchema }),
+    asyncHandler(authController.forgotPassword),
   );
 
 export default authRouter;

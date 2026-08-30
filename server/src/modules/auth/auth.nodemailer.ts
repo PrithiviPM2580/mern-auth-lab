@@ -8,6 +8,11 @@ interface SendVerificationEmailInput {
   method: EmailVerificationMethod;
 }
 
+interface SendPasswordResetEmailInput {
+  email: string;
+  token: string;
+}
+
 export const sendVerificationEmail = async ({
   email,
   token,
@@ -191,6 +196,44 @@ export const sendVerificationEmail = async ({
     from: process.env.SMTP_FROM,
     to: email,
     subject,
+    html,
+  });
+};
+
+export const sendPasswordResetEmail = async ({
+  email,
+  token,
+}: SendPasswordResetEmailInput) => {
+  const resetUrl = `${appConfig.FRONTEND_URL}/reset-password?token=${token}`;
+
+  const html = `
+    <h1>Reset your password</h1>
+
+    <p>
+      We received a request to reset your password.
+    </p>
+
+    <p>
+      Click the button below to choose a new password.
+    </p>
+
+    <a href="${resetUrl}">
+      Reset Password
+    </a>
+
+    <p>
+      This link will expire in 15 minutes.
+    </p>
+
+    <p>
+      If you didn't request a password reset, you can safely ignore this email.
+    </p>
+  `;
+
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM,
+    to: email,
+    subject: "Reset your password",
     html,
   });
 };

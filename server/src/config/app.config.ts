@@ -16,7 +16,12 @@ export const appConfigSchema = z.object({
     .number()
     .int()
     .positive()
-    .default(1),
+    .default(15),
+  PASSWORD_RESET_EXPIRES_MINUTES: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(15),
   SMTP_HOST: z.string("SMTP host must be provided"),
   SMTP_PORT: z.coerce.number().int().positive().default(465),
   SMTP_USER: z.string("SMTP user must be provided"),
