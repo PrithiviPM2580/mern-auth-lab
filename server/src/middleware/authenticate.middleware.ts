@@ -15,7 +15,7 @@ export const authenticate = (
 
   const payload = verifyAccessToken(accessToken);
 
-  req.user = payload;
+  req.auth = payload;
 
   next();
 };

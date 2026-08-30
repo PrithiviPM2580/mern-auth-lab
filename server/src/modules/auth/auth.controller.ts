@@ -157,13 +157,12 @@ const googleCallback = async (
   res: Response,
   next: NextFunction,
 ) => {
-  if (!req.user) {
+  if (!req.auth) {
     return next(AppError.unauthorized("User not authenticated"));
   }
 
-  const { accessToken, refreshToken } = await authService.completeOAuthLogin(
-    req.user,
-  );
+  const { accessToken, refreshToken, user } =
+    await authService.completeOAuthLogin(req.auth);
 
   return setAuthenticationCookies({
     res,
@@ -173,20 +172,19 @@ const googleCallback = async (
     .status(HTTP_STATUS.OK)
     .json({
       message: "User logged in successfully",
-      user: req.user,
+      user,
       accessToken,
       refreshToken,
     });
 };
 
 const githubCallback = async (req: Request, res: Response) => {
-  if (!req.user) {
+  if (!req.auth) {
     throw AppError.unauthorized("User not authenticated");
   }
 
-  const { accessToken, refreshToken } = await authService.completeOAuthLogin(
-    req.user,
-  );
+  const { accessToken, refreshToken, user } =
+    await authService.completeOAuthLogin(req.auth);
 
   return setAuthenticationCookies({
     res,
@@ -196,6 +194,7 @@ const githubCallback = async (req: Request, res: Response) => {
     .status(HTTP_STATUS.OK)
     .json({
       message: "User logged in successfully",
+      user,
       accessToken,
       refreshToken,
     });

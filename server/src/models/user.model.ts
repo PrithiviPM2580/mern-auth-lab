@@ -1,6 +1,8 @@
 import { compareValue, hashValue } from "@/utils/bcrypt.util";
 import mongoose, { Schema, type Document } from "mongoose";
 
+export type TwoFactorMethod = "totp" | "hotp";
+
 export interface OAuth {
   googleId?: string;
   githubId?: string;
@@ -8,7 +10,9 @@ export interface OAuth {
 
 export interface TwoFactor {
   enabled: boolean;
+  method?: TwoFactorMethod;
   secret?: string;
+  counter?: number;
 }
 
 export interface IUser extends Document {
@@ -48,8 +52,16 @@ const twoFactorSchema = new Schema<TwoFactor>(
       type: Boolean,
       default: false,
     },
+    method: {
+      type: String,
+      enum: ["totp", "hotp"],
+    },
     secret: {
       type: String,
+    },
+    counter: {
+      type: Number,
+      default: 0,
     },
   },
   {

@@ -79,6 +79,10 @@ const login = async (input: LoginInput) => {
     throw AppError.unauthorized("Invalid email or password");
   }
 
+  if (!user.isEmailVerified) {
+    throw AppError.unauthorized("Email is not verified");
+  }
+
   const session = await Session.create({
     userId: user._id,
     userAgent,

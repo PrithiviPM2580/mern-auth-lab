@@ -10,25 +10,14 @@ export const expireIn = () => {
 };
 
 /**
- * Safely extract userId from req.user
- * Handles both AccessTokenPayload (with userId) and IUser (with _id)
+ * Safely extract userId from req.auth (JWT payload)
  */
 export const getUserIdFromRequest = (req: Request): Types.ObjectId => {
-  const user = req.user as any;
+  const auth = req.auth;
 
-  if (!user) {
-    throw new Error("User not found in request");
+  if (!auth) {
+    throw new Error("Auth token not found in request");
   }
 
-  // JWT payload has userId
-  if ("userId" in user) {
-    return user.userId;
-  }
-
-  // Mongoose document has _id
-  if ("_id" in user) {
-    return user._id;
-  }
-
-  throw new Error("Unable to extract userId from request");
+  return auth.userId;
 };
