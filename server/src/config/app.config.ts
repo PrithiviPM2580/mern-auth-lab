@@ -12,6 +12,8 @@ export const appConfigSchema = z.object({
   JWT_ACCESS_EXPIRES_IN: z.string().default("15m"), // 15 minutes
   JWT_REFRESH_EXPIRES_IN: z.string().default("7d"), // 7 days
   JWT_REFRESH_SECRET: z.string("JWT refresh secret must be provided"),
+  JWT_2FA_SECRET: z.string("JWT 2FA secret must be provided"),
+  JWT_2FA_EXPIRES_IN: z.string().default("5m"), // 5 minutes
   EMAIL_VERIFICATION_EXPIRES_MINUTES: z.coerce
     .number()
     .int()

@@ -8,6 +8,7 @@ import type {
   ForgotPasswordInput,
   ResetPasswordInput,
   ChangePasswordInput,
+  VerifyTwoFactorLoginInput,
 } from "./auth.validation";
 import { authService } from "./auth.service";
 import { HTTP_STATUS } from "@/config/http.config";
@@ -30,10 +31,24 @@ const register = async (req: TypeRequest<RegisterInput>, res: Response) => {
 const login = async (req: TypeRequest<LoginInput>, res: Response) => {
   const userAgent = req.headers["user-agent"];
 
-  const { user, accessToken, refreshToken } = await authService.login({
+  const result = await authService.login({
     ...req.body,
     userAgent,
   });
+
+  if (result.requiresTwoFactor) {
+    return res.status(HTTP_STATUS.OK).json({
+      message: "Two factor authentication required",
+      requiresTwoFactor: true,
+      twoFactorToken: result.twoFactorToken,
+    });
+  }
+
+  const { accessToken, refreshToken, user } = result as {
+    accessToken: string;
+    refreshToken: string;
+    user: any;
+  };
 
   return setAuthenticationCookies({
     res,
@@ -157,12 +172,12 @@ const googleCallback = async (
   res: Response,
   next: NextFunction,
 ) => {
-  if (!req.auth) {
+  if (!req.user) {
     return next(AppError.unauthorized("User not authenticated"));
   }
 
   const { accessToken, refreshToken, user } =
-    await authService.completeOAuthLogin(req.auth);
+    await authService.completeOAuthLogin(req.user);
 
   return setAuthenticationCookies({
     res,
@@ -179,12 +194,12 @@ const googleCallback = async (
 };
 
 const githubCallback = async (req: Request, res: Response) => {
-  if (!req.auth) {
+  if (!req.user) {
     throw AppError.unauthorized("User not authenticated");
   }
 
   const { accessToken, refreshToken, user } =
-    await authService.completeOAuthLogin(req.auth);
+    await authService.completeOAuthLogin(req.user);
 
   return setAuthenticationCookies({
     res,
@@ -194,6 +209,27 @@ const githubCallback = async (req: Request, res: Response) => {
     .status(HTTP_STATUS.OK)
     .json({
       message: "User logged in successfully",
+      user,
+      accessToken,
+      refreshToken,
+    });
+};
+
+const verifyTwoFactorLogin = async (
+  req: TypeRequest<VerifyTwoFactorLoginInput>,
+  res: Response,
+) => {
+  const { user, accessToken, refreshToken } =
+    await authService.verifyTwoFactorLogin(req.body);
+
+  return setAuthenticationCookies({
+    res,
+    accessToken,
+    refreshToken,
+  })
+    .status(HTTP_STATUS.OK)
+    .json({
+      message: "Two factor authentication verified successfully",
       user,
       accessToken,
       refreshToken,
@@ -213,4 +249,5 @@ export const authController = {
   changePassword,
   googleCallback,
   githubCallback,
+  verifyTwoFactorLogin,
 };

@@ -10,6 +10,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   changePasswordSchema,
+  verifyTwoFactorLoginSchema,
 } from "./auth.validation";
 import { authenticate } from "@/middleware/authenticate.middleware";
 import passport from "@/config/passport.config";
@@ -104,5 +105,12 @@ authRouter.get(
   }),
   asyncHandler(authController.githubCallback),
 );
+
+authRouter
+  .route("/2fa/login")
+  .post(
+    validateRequest({ body: verifyTwoFactorLoginSchema }),
+    asyncHandler(authController.verifyTwoFactorLogin),
+  );
 
 export default authRouter;

@@ -8,6 +8,7 @@ import type {
   ResetPasswordInput,
   VerifyEmailByCodeBody,
   VerifyEmailByLinkQuery,
+  VerifyTwoFactorLoginInput,
 } from "./auth.validation";
 import User from "@/models/user.model";
 import { ERROR_CODE } from "@/constants/error-code.constant";
@@ -15,7 +16,9 @@ import {
   createAuthTokens,
   signAccessToken,
   signRefreshToken,
+  signTwoFactorChallenge,
   verifyRefreshToken,
+  verifyTwoFactorChallenge,
 } from "./auth.jwt";
 import Session from "@/models/session.model";
 import { expireIn } from "@/utils/index.util";
@@ -34,6 +37,7 @@ import {
 } from "./auth.nodemailer";
 import PasswordReset from "@/models/password-reset.model";
 import type { IUser } from "@/models/user.model";
+import { totpService } from "./two-factor/totp.service";
 
 const register = async (input: RegisterInput) => {
   const { name, email, password } = input;
@@ -83,6 +87,18 @@ const login = async (input: LoginInput) => {
     throw AppError.unauthorized("Email is not verified");
   }
 
+  if (user.twoFactor?.enabled) {
+    const twoFactorToken = signTwoFactorChallenge({
+      userId: user._id,
+      type: "2fa",
+    });
+
+    return {
+      requiresTwoFactor: true,
+      twoFactorToken,
+    };
+  }
+
   const session = await Session.create({
     userId: user._id,
     userAgent,
@@ -106,6 +122,7 @@ const login = async (input: LoginInput) => {
     user,
     accessToken,
     refreshToken,
+    requiresTwoFactor: false,
   };
 };
 
@@ -389,6 +406,51 @@ const completeOAuthLogin = async (user: any) => {
   };
 };
 
+const verifyTwoFactorLogin = async (input: VerifyTwoFactorLoginInput) => {
+  const { twoFactorToken, code, userAgent } = input;
+
+  const challenge = verifyTwoFactorChallenge(twoFactorToken);
+
+  const user = await User.findById(challenge.userId);
+
+  if (!user) {
+    throw AppError.notFound("User not found");
+  }
+
+  if (!user.twoFactor?.enabled || !user.twoFactor.secret) {
+    throw AppError.badRequest(
+      "Two factor authentication is not enabled for this user",
+    );
+  }
+
+  const isCodeValid = totpService.verifyTotp(code, user.twoFactor.secret);
+
+  if (!isCodeValid) {
+    throw AppError.unauthorized("Invalid two factor authentication code");
+  }
+
+  const session = await Session.create({
+    userId: user._id,
+    userAgent,
+    expiresAt: expireIn(),
+  });
+
+  const accessToken = signAccessToken({
+    userId: user._id,
+    sessionId: session._id,
+  });
+
+  const refreshToken = signRefreshToken({
+    sessionId: session._id,
+  });
+
+  return {
+    user,
+    accessToken,
+    refreshToken,
+  };
+};
+
 export const authService = {
   register,
   login,
@@ -401,4 +463,5 @@ export const authService = {
   resetPassword,
   changePassword,
   completeOAuthLogin,
+  verifyTwoFactorLogin,
 };
