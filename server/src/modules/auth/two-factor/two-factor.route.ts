@@ -5,6 +5,7 @@ import { Router } from "express";
 import { validateRequest } from "@/middleware/validate-request.middleware";
 import { twoFactorSchema } from "./two-factor.validation";
 import { twoFactorRateLimiter } from "@/middleware/rate-limiting.middleware";
+import { doubleCsrfProtection } from "@/middleware/csrf.middleware";
 
 const twoFactorRouter: Router = Router();
 
@@ -13,6 +14,7 @@ twoFactorRouter
   .post(
     authenticate,
     twoFactorRateLimiter,
+    doubleCsrfProtection,
     asyncHandler(twoFactorController.setupTotp),
   );
 
@@ -21,6 +23,7 @@ twoFactorRouter
   .post(
     authenticate,
     twoFactorRateLimiter,
+    doubleCsrfProtection,
     validateRequest({ body: twoFactorSchema }),
     asyncHandler(twoFactorController.verifyAndEnableTotp),
   );
@@ -30,6 +33,7 @@ twoFactorRouter
   .post(
     authenticate,
     twoFactorRateLimiter,
+    doubleCsrfProtection,
     validateRequest({ body: twoFactorSchema }),
     asyncHandler(twoFactorController.disableTotp),
   );
@@ -38,6 +42,7 @@ twoFactorRouter
   .route("/regenerate-recovery-codes")
   .post(
     authenticate,
+    doubleCsrfProtection,
     twoFactorRateLimiter,
     asyncHandler(twoFactorController.regenerateRecoveryCodes),
   );
