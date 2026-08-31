@@ -43,8 +43,20 @@ const disableTotp = async (
   });
 };
 
+const regenerateRecoveryCodes = async (req: Request, res: Response) => {
+  const result = await twoFactorService.regenerateRecoveryCodes(
+    req.auth!.userId,
+  );
+
+  return res.status(200).json({
+    message: "Recovery codes regenerated successfully",
+    result,
+  });
+};
+
 export const twoFactorController = {
   setupTotp,
   verifyAndEnableTotp,
   disableTotp,
+  regenerateRecoveryCodes,
 };

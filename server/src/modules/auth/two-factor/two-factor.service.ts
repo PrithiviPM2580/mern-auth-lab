@@ -124,9 +124,39 @@ const verifyRecoveryCode = async (user: IUser, code: string) => {
   return false;
 };
 
+const regenerateRecoveryCodes = async (userId: Types.ObjectId) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw AppError.notFound("User not found");
+  }
+
+  if (!user.twoFactor?.enabled) {
+    throw AppError.badRequest("Two factor authentication is not enabled");
+  }
+
+  const recoveryCodes = generateRecoveryCodes();
+
+  const hashedRecoveryCodes = await Promise.all(
+    recoveryCodes.map(async (code) => ({
+      codeHash: await hashRecoveryCode(code),
+      used: false,
+    })),
+  );
+
+  user.twoFactor.recoveryCodes = hashedRecoveryCodes;
+
+  await user.save();
+
+  return {
+    recoveryCodes,
+  };
+};
+
 export const twoFactorService = {
   setupTotp,
   verifyAndEnableTotp,
   disableTotp,
   verifyRecoveryCode,
+  regenerateRecoveryCodes,
 };
