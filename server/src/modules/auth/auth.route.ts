@@ -14,12 +14,18 @@ import {
 } from "./auth.validation";
 import { authenticate } from "@/middleware/authenticate.middleware";
 import passport from "@/config/passport.config";
+import {
+  authRateLimiter,
+  strictAuthRateLimiter,
+  twoFactorRateLimiter,
+} from "@/middleware/rate-limiting.middleware";
 
 const authRouter: Router = Router();
 
 authRouter
   .route("/register")
   .post(
+    authRateLimiter,
     validateRequest({ body: registerSchema }),
     asyncHandler(authController.register),
   );
@@ -27,11 +33,14 @@ authRouter
 authRouter
   .route("/login")
   .post(
+    strictAuthRateLimiter,
     validateRequest({ body: loginSchema }),
     asyncHandler(authController.login),
   );
 
-authRouter.route("/refresh").post(asyncHandler(authController.refresh));
+authRouter
+  .route("/refresh")
+  .post(authRateLimiter, asyncHandler(authController.refresh));
 
 authRouter
   .route("/logout")
@@ -42,6 +51,7 @@ authRouter.route("/me").get(authenticate, asyncHandler(authController.getMe));
 authRouter
   .route("/verify-email/link")
   .get(
+    strictAuthRateLimiter,
     validateRequest({ query: verifyEmailByLinkQuery }),
     asyncHandler(authController.verifyEmailByLink),
   );
@@ -49,6 +59,7 @@ authRouter
 authRouter
   .route("/verify-email/code")
   .post(
+    strictAuthRateLimiter,
     validateRequest({ body: verifyEmailByCodeBody }),
     asyncHandler(authController.verifyEmailByCode),
   );
@@ -56,6 +67,7 @@ authRouter
 authRouter
   .route("/forgot-password")
   .post(
+    strictAuthRateLimiter,
     validateRequest({ body: forgotPasswordSchema }),
     asyncHandler(authController.forgotPassword),
   );
@@ -63,6 +75,7 @@ authRouter
 authRouter
   .route("/reset-password")
   .post(
+    strictAuthRateLimiter,
     validateRequest({ body: resetPasswordSchema }),
     asyncHandler(authController.resetPassword),
   );
@@ -71,6 +84,7 @@ authRouter
   .route("/change-password")
   .post(
     authenticate,
+    strictAuthRateLimiter,
     validateRequest({ body: changePasswordSchema }),
     asyncHandler(authController.changePassword),
   );
@@ -109,6 +123,7 @@ authRouter.get(
 authRouter
   .route("/2fa/login")
   .post(
+    twoFactorRateLimiter,
     validateRequest({ body: verifyTwoFactorLoginSchema }),
     asyncHandler(authController.verifyTwoFactorLogin),
   );
