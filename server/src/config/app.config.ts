@@ -6,6 +6,7 @@ export const appConfigSchema = z.object({
   BASE_PATH: z.string().default("/api/v1"),
   FRONTEND_URL: z.url().default("http://localhost:5173"),
   APP_ORIGIN: z.url().default("http://localhost:3000"),
+  CSRF_SECRET: z.string("CSRF secret must be provided"),
   JWT_AUDIENCE: z.string().default("user"),
   JWT_ISSUER: z.string().default("advance-mern-auth"),
   JWT_ACCESS_SECRET: z.string("JWT access secret must be provided"),

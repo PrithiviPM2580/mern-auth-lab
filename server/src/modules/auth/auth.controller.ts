@@ -18,6 +18,7 @@ import {
 } from "./auth.cookie";
 import { AppError } from "@/errors/app.error";
 import { getUserIdFromRequest } from "@/utils/index.util";
+import { generateCsrfToken } from "@/middleware/csrf.middleware";
 
 const register = async (req: TypeRequest<RegisterInput>, res: Response) => {
   const user = await authService.register(req.body);
@@ -236,6 +237,15 @@ const verifyTwoFactorLogin = async (
     });
 };
 
+const getCsrfToken = async (req: Request, res: Response) => {
+  const token = await generateCsrfToken(req, res);
+
+  return res.status(HTTP_STATUS.OK).json({
+    message: "CSRF token generated successfully",
+    csrfToken: token,
+  });
+};
+
 export const authController = {
   register,
   login,
@@ -250,4 +260,5 @@ export const authController = {
   googleCallback,
   githubCallback,
   verifyTwoFactorLogin,
+  getCsrfToken,
 };

@@ -19,6 +19,7 @@ import {
   strictAuthRateLimiter,
   twoFactorRateLimiter,
 } from "@/middleware/rate-limiting.middleware";
+import { doubleCsrfProtection } from "@/middleware/csrf.middleware";
 
 const authRouter: Router = Router();
 
@@ -40,11 +41,19 @@ authRouter
 
 authRouter
   .route("/refresh")
-  .post(authRateLimiter, asyncHandler(authController.refresh));
+  .post(
+    authRateLimiter,
+    doubleCsrfProtection,
+    asyncHandler(authController.refresh),
+  );
 
 authRouter
   .route("/logout")
-  .post(authenticate, asyncHandler(authController.logout));
+  .post(
+    authenticate,
+    doubleCsrfProtection,
+    asyncHandler(authController.logout),
+  );
 
 authRouter.route("/me").get(authenticate, asyncHandler(authController.getMe));
 
@@ -52,6 +61,7 @@ authRouter
   .route("/verify-email/link")
   .get(
     strictAuthRateLimiter,
+    doubleCsrfProtection,
     validateRequest({ query: verifyEmailByLinkQuery }),
     asyncHandler(authController.verifyEmailByLink),
   );
@@ -60,6 +70,7 @@ authRouter
   .route("/verify-email/code")
   .post(
     strictAuthRateLimiter,
+    doubleCsrfProtection,
     validateRequest({ body: verifyEmailByCodeBody }),
     asyncHandler(authController.verifyEmailByCode),
   );
@@ -76,6 +87,7 @@ authRouter
   .route("/reset-password")
   .post(
     strictAuthRateLimiter,
+    doubleCsrfProtection,
     validateRequest({ body: resetPasswordSchema }),
     asyncHandler(authController.resetPassword),
   );
@@ -85,6 +97,7 @@ authRouter
   .post(
     authenticate,
     strictAuthRateLimiter,
+    doubleCsrfProtection,
     validateRequest({ body: changePasswordSchema }),
     asyncHandler(authController.changePassword),
   );
@@ -124,8 +137,11 @@ authRouter
   .route("/2fa/login")
   .post(
     twoFactorRateLimiter,
+    doubleCsrfProtection,
     validateRequest({ body: verifyTwoFactorLoginSchema }),
     asyncHandler(authController.verifyTwoFactorLogin),
   );
+
+authRouter.route("/csrf-token").get(asyncHandler(authController.getCsrfToken));
 
 export default authRouter;
