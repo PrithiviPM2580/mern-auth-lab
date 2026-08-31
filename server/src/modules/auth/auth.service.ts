@@ -36,9 +36,9 @@ import {
   sendVerificationEmail,
 } from "./auth.nodemailer";
 import PasswordReset from "@/models/password-reset.model";
-import type { IUser } from "@/models/user.model";
 import { totpService } from "./two-factor/totp.service";
 import { twoFactorService } from "./two-factor/two-factor.service";
+import { MAX_LOGIN_ATTEMPTS, LOCK_TIME_MS } from "@/constants/index.constant";
 
 const register = async (input: RegisterInput) => {
   const { name, email, password } = input;
@@ -78,11 +78,40 @@ const login = async (input: LoginInput) => {
     throw AppError.unauthorized("Invalid email or password");
   }
 
+  // Check whether the account is currently locked
+  if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
+    throw AppError.tooManyRequests(
+      "Too many failed login attempts. Please try again later.",
+    );
+  }
+
+  // Lock period has expired
+  if (user.lockedUntil && user.lockedUntil.getTime() <= Date.now()) {
+    user.failedLoginAttempts = 0;
+    user.lockedUntil = null;
+
+    await user.save();
+  }
+
   const isPasswordValid = await user.comparePassword(password);
 
   if (!isPasswordValid) {
+    user.failedLoginAttempts += 1;
+
+    if (user.failedLoginAttempts >= MAX_LOGIN_ATTEMPTS) {
+      user.lockedUntil = new Date(Date.now() + LOCK_TIME_MS);
+    }
+
+    await user.save();
+
     throw AppError.unauthorized("Invalid email or password");
   }
+
+  // Password is correct, reset failed-login state
+  user.failedLoginAttempts = 0;
+  user.lockedUntil = null;
+
+  await user.save();
 
   if (!user.isEmailVerified) {
     throw AppError.unauthorized("Email is not verified");
@@ -361,12 +390,17 @@ const resetPassword = async (input: ResetPasswordInput) => {
 
   await user.save();
 
+  await Session.deleteMany({
+    userId: user._id,
+  });
+
   await passwordReset.deleteOne();
 };
 
 const changePassword = async (
   input: ChangePasswordInput,
   userId: Types.ObjectId,
+  currentSessionId: Types.ObjectId,
 ) => {
   const { currentPassword, newPassword } = input;
 
@@ -385,6 +419,11 @@ const changePassword = async (
   user.passwordHash = newPassword;
 
   await user.save();
+
+  await Session.deleteMany({
+    userId,
+    _id: { $ne: currentSessionId },
+  });
 };
 
 const completeOAuthLogin = async (user: any) => {

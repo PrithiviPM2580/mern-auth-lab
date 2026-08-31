@@ -96,6 +96,7 @@ const disableTotp = async (userId: Types.ObjectId, code: string) => {
 
   user.twoFactor.enabled = false;
   user.twoFactor.secret = undefined;
+  user.twoFactor.recoveryCodes = [];
 
   await user.save();
 

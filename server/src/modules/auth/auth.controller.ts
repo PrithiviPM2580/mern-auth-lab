@@ -17,7 +17,10 @@ import {
   setAuthenticationCookies,
 } from "./auth.cookie";
 import { AppError } from "@/errors/app.error";
-import { getUserIdFromRequest } from "@/utils/index.util";
+import {
+  getUserIdFromRequest,
+  getCurrentSessionIdFromRequest,
+} from "@/utils/index.util";
 import { generateCsrfToken } from "@/middleware/csrf.middleware";
 
 const register = async (req: TypeRequest<RegisterInput>, res: Response) => {
@@ -160,8 +163,9 @@ const changePassword = async (
   res: Response,
 ) => {
   const userId = getUserIdFromRequest(req);
+  const currentSessionId = getCurrentSessionIdFromRequest(req);
 
-  await authService.changePassword(req.body, userId);
+  await authService.changePassword(req.body, userId, currentSessionId);
 
   return res.status(HTTP_STATUS.OK).json({
     message: "Password changed successfully",

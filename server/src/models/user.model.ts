@@ -23,6 +23,8 @@ export interface IUser extends Document {
   name: string;
   email: string;
   passwordHash?: string;
+  failedLoginAttempts: number;
+  lockedUntil?: Date | null;
   isEmailVerified: boolean;
   oauth: OAuth;
   twoFactor: TwoFactor;
@@ -101,6 +103,15 @@ const userSchema = new Schema<IUser>(
     },
     passwordHash: {
       type: String,
+    },
+    failedLoginAttempts: {
+      type: Number,
+      default: 0,
+    },
+
+    lockedUntil: {
+      type: Date,
+      default: null,
     },
     isEmailVerified: {
       type: Boolean,
