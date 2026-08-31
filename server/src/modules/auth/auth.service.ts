@@ -38,6 +38,7 @@ import {
 import PasswordReset from "@/models/password-reset.model";
 import type { IUser } from "@/models/user.model";
 import { totpService } from "./two-factor/totp.service";
+import { twoFactorService } from "./two-factor/two-factor.service";
 
 const register = async (input: RegisterInput) => {
   const { name, email, password } = input;
@@ -426,7 +427,13 @@ const verifyTwoFactorLogin = async (input: VerifyTwoFactorLoginInput) => {
   const isCodeValid = totpService.verifyTotp(code, user.twoFactor.secret);
 
   if (!isCodeValid) {
-    throw AppError.unauthorized("Invalid two factor authentication code");
+    const isRecoveryCodeValid = await twoFactorService.verifyRecoveryCode(
+      user,
+      code,
+    );
+    if (!isRecoveryCodeValid) {
+      throw AppError.unauthorized("Invalid two factor authentication code");
+    }
   }
 
   const session = await Session.create({

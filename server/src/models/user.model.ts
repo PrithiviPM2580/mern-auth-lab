@@ -13,6 +13,10 @@ export interface TwoFactor {
   method?: TwoFactorMethod;
   secret?: string;
   counter?: number;
+  recoveryCodes?: {
+    codeHash: string;
+    used: boolean;
+  }[];
 }
 
 export interface IUser extends Document {
@@ -63,6 +67,18 @@ const twoFactorSchema = new Schema<TwoFactor>(
       type: Number,
       default: 0,
     },
+    recoveryCodes: [
+      {
+        codeHash: {
+          type: String,
+          required: true,
+        },
+        used: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
   },
   {
     _id: false,
