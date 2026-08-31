@@ -27,4 +27,11 @@ twoFactorRouter
     asyncHandler(twoFactorController.disableTotp),
   );
 
+twoFactorRouter
+  .route("/regenerate-recovery-codes")
+  .post(
+    authenticate,
+    asyncHandler(twoFactorController.regenerateRecoveryCodes),
+  );
+
 export default twoFactorRouter;
