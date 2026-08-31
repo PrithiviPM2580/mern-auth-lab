@@ -56,7 +56,65 @@ const linkGithub = async (userId: Types.ObjectId, githubId: string) => {
   };
 };
 
+const unlinkGoogle = async (userId: Types.ObjectId) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw AppError.notFound("User not found");
+  }
+
+  if (!user.oauth.googleId) {
+    throw AppError.badRequest("No Google account is linked");
+  }
+
+  const hasPassword = Boolean(user.passwordHash);
+  const hasGithub = Boolean(user.oauth.githubId);
+
+  if (!hasPassword && !hasGithub) {
+    throw AppError.badRequest("Cannot unlink your only authentication method");
+  }
+
+  user.oauth.googleId = undefined;
+
+  await user.save();
+
+  return {
+    provider: "google",
+    linked: false,
+  };
+};
+
+const unlinkGithub = async (userId: Types.ObjectId) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw AppError.notFound("User not found");
+  }
+
+  if (!user.oauth.githubId) {
+    throw AppError.badRequest("No GitHub account is linked");
+  }
+
+  const hasPassword = Boolean(user.passwordHash);
+  const hasGoogle = Boolean(user.oauth.googleId);
+
+  if (!hasPassword && !hasGoogle) {
+    throw AppError.badRequest("Cannot unlink your only authentication method");
+  }
+
+  user.oauth.githubId = undefined;
+
+  await user.save();
+
+  return {
+    provider: "github",
+    linked: false,
+  };
+};
+
 export const oauthService = {
   linkGoogle,
   linkGithub,
+  unlinkGoogle,
+  unlinkGithub,
 };
