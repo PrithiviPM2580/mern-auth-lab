@@ -25,9 +25,9 @@ const findOrCreateGoogleUser = async (profile: GoogleProfile) => {
   user = await User.findOne({ email });
 
   if (user) {
-    user.oauth.googleId = googleId;
-    await user.save();
-    return user;
+    throw AppError.conflict(
+      "An account with this email already exists. Please log in and link your Google account.",
+    );
   }
 
   user = await User.create({
@@ -67,9 +67,9 @@ const findOrCreateGitHubUser = async (profile: GithubProfile) => {
   user = await User.findOne({ email });
 
   if (user) {
-    user.oauth.githubId = githubId;
-    await user.save();
-    return user;
+    throw AppError.conflict(
+      "An account with this email already exists. Please log in and link your GitHub account.",
+    );
   }
 
   user = await User.create({
