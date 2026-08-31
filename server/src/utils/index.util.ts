@@ -21,3 +21,15 @@ export const getUserIdFromRequest = (req: Request): Types.ObjectId => {
 
   return auth.userId;
 };
+
+export const getCurrentSessionIdFromRequest = (
+  req: Request,
+): Types.ObjectId => {
+  const auth = req.auth;
+
+  if (!auth) {
+    throw new Error("Auth token not found in request");
+  }
+
+  return auth.sessionId;
+};

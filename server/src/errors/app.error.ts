@@ -48,4 +48,11 @@ export class AppError extends Error {
   ) {
     return new AppError(message, HTTP_STATUS.INTERNAL_SERVER_ERROR, errorCode);
   }
+
+  static tooManyRequests(
+    message = "Too many requests",
+    errorCode = ERROR_CODE.TOO_MANY_REQUESTS,
+  ) {
+    return new AppError(message, HTTP_STATUS.TOO_MANY_REQUESTS, errorCode);
+  }
 }
