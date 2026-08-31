@@ -74,9 +74,29 @@ const githubLinkCallback = async (req: Request, res: Response) => {
   });
 };
 
+const unlinkGoogle = async (req: Request, res: Response) => {
+  const result = await oauthService.unlinkGoogle(req.auth!.userId);
+
+  return res.status(200).json({
+    message: "Google account unlinked successfully",
+    result,
+  });
+};
+
+const unlinkGithub = async (req: Request, res: Response) => {
+  const result = await oauthService.unlinkGithub(req.auth!.userId);
+
+  return res.status(200).json({
+    message: "GitHub account unlinked successfully",
+    result,
+  });
+};
+
 export const oauthController = {
   googleLink,
   githubLink,
   googleLinkCallback,
   githubLinkCallback,
+  unlinkGoogle,
+  unlinkGithub,
 };
