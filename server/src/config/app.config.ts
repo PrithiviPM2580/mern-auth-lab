@@ -7,6 +7,7 @@ export const appConfigSchema = z.object({
   FRONTEND_URL: z.url().default("http://localhost:5173"),
   APP_ORIGIN: z.url().default("http://localhost:3000"),
   CSRF_SECRET: z.string("CSRF secret must be provided"),
+  JWT_SECRET: z.string("JWT secret must be provided"),
   JWT_AUDIENCE: z.string().default("user"),
   JWT_ISSUER: z.string().default("advance-mern-auth"),
   JWT_ACCESS_SECRET: z.string("JWT access secret must be provided"),
@@ -35,6 +36,12 @@ export const appConfigSchema = z.object({
   GITHUB_CLIENT_ID: z.string("GitHub client ID must be provided"),
   GITHUB_CLIENT_SECRET: z.string("GitHub client secret must be provided"),
   GITHUB_CALLBACK_URL: z.string("GitHub callback URL must be provided"),
+  GOOGLE_LINK_CALLBACK_URL: z.string(
+    "Google link callback URL must be provided",
+  ),
+  GITHUB_LINK_CALLBACK_URL: z.string(
+    "GitHub link callback URL must be provided",
+  ),
   MONGODB_URI: z.url("MongoDB connection string must be a valid URL"),
 });
 
