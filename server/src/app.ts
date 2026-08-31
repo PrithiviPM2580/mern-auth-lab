@@ -13,6 +13,7 @@ import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import morgan from "morgan";
 import cors from "cors";
+import sessionRouter from "./modules/auth/session/session.route";
 
 const app: Application = express();
 
@@ -42,6 +43,7 @@ app.get("/health", (req: Request, res: Response) => {
 
 app.use(`${appConfig.BASE_PATH}/auth`, authRouter);
 app.use(`${appConfig.BASE_PATH}/2fa`, twoFactorRouter);
+app.use(`${appConfig.BASE_PATH}/auth/sessions`, sessionRouter);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.status(404).json({
